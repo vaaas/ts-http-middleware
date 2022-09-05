@@ -1,0 +1,16 @@
+{
+    "name": "ts-http-middleware",
+    "version": "1.0.0",
+    "license": "MIT",
+    "scripts": {
+        "build": "tsc",
+        "test": "node --test"
+    },
+    "exports": {
+        "./barebones-bearer": "./dist/barebones-bearer.js"
+    },
+    "devDependencies": {
+        "@types/node": "^18.7.15",
+        "fpts": "github:vaaas/fpts"
+    }
+}
