@@ -25,7 +25,7 @@ describe('barebones-bearer', () => {
                 end: spy(() => res),
             }
 
-            barebones_bearer.default('test', () => { throw new Error('unreachable') })(req, res)
+            barebones_bearer.default('test')(req, res, () => { throw new Error('unreachable') })
 
             assert.equal(res.writeHead.calls.length, 1)
             assert.deepEqual(res.writeHead.calls, [[401]])
@@ -44,11 +44,10 @@ describe('barebones-bearer', () => {
             end: spy(() => res),
         }
 
-        barebones_bearer.default('test', (req, res) => { res.writeHead(200).end('Yo') })(req, res)
+        const next = spy(() => {})
+        barebones_bearer.default('test')(req, res, next)
 
-        assert.equal(res.writeHead.calls.length, 1)
-        assert.deepEqual(res.writeHead.calls, [[200]])
-        assert.equal(res.end.calls.length, 1)
-        assert.deepEqual(res.end.calls, [['Yo']])
+        assert.equal(next.calls.length, 1)
+        assert.deepEqual(next.calls, [[]])
     })
 })

@@ -1,4 +1,4 @@
-import type * as http from 'http'
+import type { Request, Response, NextFunction } from 'express';
 
 const prefix = 'Bearer '
 const prefix_len = prefix.length;
@@ -12,12 +12,12 @@ function same_string(a: string, b: string, offset: number) {
     return true;
 }
 
-export default function(token: string, callback: (req: http.IncomingMessage, res: http.ServerResponse) => void) {
-    return function(req: http.IncomingMessage, res: http.ServerResponse): void {
+export default function(token: string) {
+    return function(req: Request, res: Response, next: NextFunction): void {
         if (req.headers.authorization
             && req.headers.authorization.startsWith(prefix)
             && same_string(req.headers.authorization, token, prefix_len))
-            callback(req, res);
+            next();
         else
             res.writeHead(401).end();
     }

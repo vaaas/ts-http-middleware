@@ -10,12 +10,12 @@ function same_string(a, b, offset) {
             return false;
     return true;
 }
-function default_1(token, callback) {
-    return function (req, res) {
+function default_1(token) {
+    return function (req, res, next) {
         if (req.headers.authorization
             && req.headers.authorization.startsWith(prefix)
             && same_string(req.headers.authorization, token, prefix_len))
-            callback(req, res);
+            next();
         else
             res.writeHead(401).end();
     };
