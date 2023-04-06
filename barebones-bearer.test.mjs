@@ -4,20 +4,40 @@ import { spy } from 'fpts/function'
 import barebones_bearer from './dist/barebones-bearer.js'
 
 describe('barebones-bearer', () => {
-    it('should reject invalid requests', () => {
-        const cases = [
-            undefined,
-            '',
-            'Bearar test',
-            'Bearer',
-            'Bearertest',
-            'Bearer tast',
-            'Bearer testt',
-        ]
-        for (const c of cases) {
+    describe('default', () => {
+        it('should reject invalid requests', () => {
+            const cases = [
+                undefined,
+                '',
+                'Bearar test',
+                'Bearer',
+                'Bearertest',
+                'Bearer tast',
+                'Bearer testt',
+            ]
+            for (const c of cases) {
+                const req = {
+                    headers: {
+                        authorization: c,
+                    }
+                }
+                const res = {
+                    writeHead: spy(() => res),
+                    end: spy(() => res),
+                }
+
+                barebones_bearer.default('test')(req, res, () => { throw new Error('unreachable') })
+
+                assert.equal(res.writeHead.calls.length, 1)
+                assert.deepEqual(res.writeHead.calls, [[401]])
+                assert.equal(res.end.calls.length, 1)
+            }
+        })
+
+        it('should run callback on valid requests', () => {
             const req = {
                 headers: {
-                    authorization: c,
+                    authorization: 'Bearer test',
                 }
             }
             const res = {
@@ -25,29 +45,60 @@ describe('barebones-bearer', () => {
                 end: spy(() => res),
             }
 
-            barebones_bearer.default('test')(req, res, () => { throw new Error('unreachable') })
+            const next = spy(() => {})
+            barebones_bearer.default('test')(req, res, next)
 
-            assert.equal(res.writeHead.calls.length, 1)
-            assert.deepEqual(res.writeHead.calls, [[401]])
-            assert.equal(res.end.calls.length, 1)
-        }
-    })
+            assert.equal(next.calls.length, 1)
+            assert.deepEqual(next.calls, [[]])
+        })
+    });
 
-    it('should run callback on valid requests', () => {
-        const req = {
-            headers: {
-                authorization: 'Bearer test',
+    describe('v2', () => {
+        it('should reject invalid requests', () => {
+            const cases = [
+                undefined,
+                '',
+                'Bearar test',
+                'Bearer',
+                'Bearertest',
+                'Bearer tast',
+                'Bearer testt',
+            ]
+            for (const c of cases) {
+                const req = {
+                    headers: {
+                        authorization: c,
+                    }
+                }
+                const res = {
+                    writeHead: spy(() => res),
+                    end: spy(() => res),
+                }
+
+                barebones_bearer.v2('test')(() => { throw new Error('unreachable') })(req, res)
+
+                assert.equal(res.writeHead.calls.length, 1)
+                assert.deepEqual(res.writeHead.calls, [[401]])
+                assert.equal(res.end.calls.length, 1)
             }
-        }
-        const res = {
-            writeHead: spy(() => res),
-            end: spy(() => res),
-        }
+        })
 
-        const next = spy(() => {})
-        barebones_bearer.default('test')(req, res, next)
+        it('should run callback on valid requests', () => {
+            const req = {
+                headers: {
+                    authorization: 'Bearer test',
+                }
+            }
+            const res = {
+                writeHead: spy(() => res),
+                end: spy(() => res),
+            }
 
-        assert.equal(next.calls.length, 1)
-        assert.deepEqual(next.calls, [[]])
-    })
+            const next = spy(() => {})
+            barebones_bearer.v2('test')(next)(req, res)
+
+            assert.equal(next.calls.length, 1)
+            assert.deepEqual(next.calls, [[req, res]])
+        })
+    });
 })

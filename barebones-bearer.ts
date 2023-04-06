@@ -22,3 +22,14 @@ export default function(token: string) {
             res.writeHead(401).end();
     }
 }
+
+export const v2 = (token: string) => (f: (req: Request, res: Response) => void) => (req: Request, res: Response) => {
+    if (
+        req.headers.authorization
+        && req.headers.authorization.startsWith(prefix)
+        && same_string(req.headers.authorization, token, prefix_len)
+    )
+        f(req, res);
+    else
+        res.writeHead(401).end();
+}

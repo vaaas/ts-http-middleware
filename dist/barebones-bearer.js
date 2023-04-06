@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.v2 = void 0;
 const prefix = 'Bearer ';
 const prefix_len = prefix.length;
 function same_string(a, b, offset) {
@@ -21,3 +22,12 @@ function default_1(token) {
     };
 }
 exports.default = default_1;
+const v2 = (token) => (f) => (req, res) => {
+    if (req.headers.authorization
+        && req.headers.authorization.startsWith(prefix)
+        && same_string(req.headers.authorization, token, prefix_len))
+        f(req, res);
+    else
+        res.writeHead(401).end();
+};
+exports.v2 = v2;
